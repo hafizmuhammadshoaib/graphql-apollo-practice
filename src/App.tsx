@@ -1,24 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.scss";
+import { useQuery } from "@apollo/client";
+import { GET_CITY_BY_NAME } from "./queries";
+import { CityByName, CityByNameVars } from "./types";
+import { Weather } from "./components/Weather";
 
 function App() {
+  const [cityInput, setCityInput] = useState("");
+  const [cityName, setCityName] = useState("");
+  const { loading, data } = useQuery<CityByName, CityByNameVars>(
+    GET_CITY_BY_NAME,
+    { variables: { name: cityName } }
+  );
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCityName(cityInput);
+  };
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <form onSubmit={onFormSubmit}>
+        <input
+          name="city"
+          type="text"
+          value={cityInput}
+          onChange={(e) => setCityInput(e.target.value)}
+        />
+        <input
+          className="btn btn-warning ml-2"
+          type="submit"
+          value="Get Weather"
+        />
+      </form>
+      {loading && (
+        <div className="container">
+          <div className="spinner-grow text-warning" role="status">
+            <span className="sr-only">Loading...</span>
+          </div>
+        </div>
+      )}
+      {data?.getCityByName && <Weather {...data?.getCityByName} />}
     </div>
   );
 }
